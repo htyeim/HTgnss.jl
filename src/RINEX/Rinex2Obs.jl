@@ -28,9 +28,20 @@ function add_epoch_line2!(sods::Dict{SatID,SatelliteObsData},
                 f::IOStream, satid::SatID, this_dt::DateTime, 
                 systemNumObs::D_SystemNumObs,
                 recommend_length::Int64, )
-
+    
     obsNum, obsIds = get(systemNumObs, satid.ss, (0, Array{ObsID,1}()))
-    obsNum == 0 && throw(error("no such system $satid"))
+    if obsNum == 0
+        ss = collect(keys(systemNumObs))[1]
+        obsNum, _ = systemNumObs[ss]
+        nl = ceil(Int64, obsNum / 5.0)
+        # @show obsNum, nl
+        for i in 1:nl
+            # @show i, 
+            readline(f)
+        end
+        return 
+        throw(error("no such system $satid"))
+    end
 
     if haskey(sods, satid)
         this_sod = sods[satid]
