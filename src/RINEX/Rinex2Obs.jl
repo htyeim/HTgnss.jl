@@ -106,8 +106,11 @@ function read_one_epoch2(f::IOStream,
 
 
     numSVs = parse(Int64, ephs[30:32])
-    numSVs == 0 && throw(error("0 satellite? \n|$ephs|"))
-
+    
+    if numSVs == 0 
+        @warn "0 satellite? \n|$ephs|"
+    end
+    
     if epf in ephs_dr_set # 0,1,6 data record
         this_dt = parse_2epoch_time(ephs, toUTC)
 
