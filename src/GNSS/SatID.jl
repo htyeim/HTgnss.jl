@@ -34,9 +34,13 @@ function char2SatelliteSystemType(c::Char,
     mapC2SS::Dict{Char,SatelliteSystemType}=mapC2SS,
 )::SatelliteSystemType
     c = uppercase(c)
-    haskey(mapC2SS, c) ||
-        throw(error("no such SatelliteSystemType: $c"))
-    mapC2SS[c]
+    if haskey(mapC2SS, c) 
+        mapC2SS[c]
+    else
+        print("$c>G")
+        mapC2SS['G']
+    end
+    
 end
 const mapSS2C = Dict{SatelliteSystemType,Char}(
     sstGPS => 'G',
@@ -112,6 +116,7 @@ struct SatID
     id::Int64
     function SatID(str::Union{String,SubString})
         length(str) == 3 || throw(error("not a valid satid: $str"))
+
         ss = char2SatelliteSystemType(str[1])
         if str[2] == ' '
             str = string(str[1], '0', str[3])
