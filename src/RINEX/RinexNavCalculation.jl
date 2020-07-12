@@ -90,7 +90,8 @@ function calculate_pos(ees::EphEpochStore, dt::DateTime, )
         calculate_Fit_pos(ees, dt)
     elseif ees.si.ss == sstGeosync
         for (k, v) in ees.eph
-            return ECEF(v[4], v[8], v[12], )
+            vd = v.d
+            return ECEF(vd[4], vd[8], vd[12], )
         end
     else
         calculate_Orbit_pos(ees, dt)
