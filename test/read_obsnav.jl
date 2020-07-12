@@ -40,7 +40,7 @@ function test_pos()
     oh = test_obs()
     nh = test_nav()
     ndata = nh.data.data
-    ks = sort!(collect(keys(oh.data.obs)), by=x->x.str)
+    ks = sort!(collect(keys(oh.data.obs)), by=x -> x.str)
     isat = ks[30]
     idata = oh.data.obs[isat]
     dt = idata.dts[2]
@@ -60,5 +60,3 @@ function test_pos()
     # nh.data.data[HTgnss.SatID("G11")].eph
 
 end
-
-
