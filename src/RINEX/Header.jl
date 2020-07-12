@@ -377,14 +377,14 @@ begin
             start_index = 4
             for iot in 1:obsn
                 start_index += 4
-                this_obst[iot] = 
-                    ObsID(this_line[start_index:start_index + 2],
-                            satSys)
-                if start_index > 55
+                if start_index > 58
                     this_line = lines[i_lines]
                     i_lines +=  1
                     start_index = 4
                 end
+                this_obst[iot] = 
+                    ObsID(this_line[start_index:start_index + 2],
+                            satSys)
             end
             obst[satSys] = (obsn, this_obst)
         end
