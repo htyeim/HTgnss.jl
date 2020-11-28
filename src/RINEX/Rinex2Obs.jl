@@ -114,7 +114,10 @@ function read_one_epoch2(f::IOStream,
     if epf in ephs_dr_set # 0,1,6 data record
         this_dt = parse_2epoch_time(ephs, toUTC)
 
-        haskey(epochs, this_dt) && throw(error("duplicate epoch? $ephs"))
+        if haskey(epochs, this_dt) 
+            @warn "duplicate epoch? $ephs"
+            delete!(epochs, this_dt) 
+        end
         len_ephs = length(ephs)
         if len_ephs > 68
             index_end = len_ephs > 80 ? 80 : len_ephs
