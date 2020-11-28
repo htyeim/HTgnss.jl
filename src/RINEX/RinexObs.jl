@@ -117,14 +117,14 @@ function merge_obs(obss::Array{RinexObs,1})
         pos = iobs.header.antennaPosition
         tp[i] = (firstT, pos)
     end
-    sort!(tp, by=x->x[1])
+    sort!(tp, by=x -> x[1])
     center_pos = tp[ceil(Int64, len_obss / 2)][2]
 
     data1 = Dict{SatID,Tuple{Array{ObsID,1},Array{SatelliteObsData,1}}}()
     lens = Dict{SatID,Int64}()
     for iobs in obss
         this_pos = iobs.header.antennaPosition
-        if 10 < distance(this_pos,
+        if 10 < euclidean_distance(this_pos,
                             center_pos)
             @warn "same sation different position?:\n$center_pos; $this_pos"
             continue
@@ -163,7 +163,7 @@ function merge_obs(obss::Array{RinexObs,1})
             this_oids = isod.obsids
             this_obss = isod.obs
             for (i, ioid) in enumerate(ioids)
-                j = findfirst(x->x == ioid, this_oids)
+                j = findfirst(x -> x == ioid, this_oids)
                 append!(obs[i], this_obss[j])
             end
         end
