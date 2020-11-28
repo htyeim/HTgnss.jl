@@ -6,13 +6,13 @@ function parse_3epoch_time(ephs::String,toUTC::Millisecond,
     epoch_dt_format3::DateFormat=epoch_dt_format3)
     
     dtstr = SubString(ephs, 3, 29)
-    y = parse(Int64, dtstr[1:4])
-    m = parse(Int64, dtstr[6:7])
-    d = parse(Int64, dtstr[9:10])
-    H = parse(Int64, dtstr[12:13])
-    M = parse(Int64, dtstr[15:16])
-    S = parse(Int64, dtstr[18:19])
-    s = parse(Int64, dtstr[21:23])
+    y = parse_Int_or_Empty(dtstr[1:4])
+    m = parse_Int_or_Empty(dtstr[6:7])
+    d = parse_Int_or_Empty(dtstr[9:10])
+    H = parse_Int_or_Empty(dtstr[12:13])
+    M = parse_Int_or_Empty(dtstr[15:16])
+    S = parse_Int_or_Empty(dtstr[18:19])
+    s = parse_Int_or_Empty(dtstr[21:23])
     this_dt = Dates.DateTime(y, m, d, H, M, S, s)
     # @show ephs
     # @show this_dt

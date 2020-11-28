@@ -8,14 +8,15 @@ function parse_2epoch_time(ephs::String, toUTC::Millisecond)
     if y < 70 y += 2000
     else y += 1900
     end
-    m = parse(Int64, dtstr[4:5])
-    d = parse(Int64, dtstr[7:8])
-    H = parse(Int64, dtstr[10:11])
-    M = parse(Int64, dtstr[13:14])
-    S = parse(Int64, dtstr[16:17])
+
+    m = parse_Int_or_Empty(dtstr[4:5])
+    d = parse_Int_or_Empty(dtstr[7:8])
+    H = parse_Int_or_Empty(dtstr[10:11])
+    M = parse_Int_or_Empty(dtstr[13:14])
+    S = parse_Int_or_Empty(dtstr[16:17])
     # s = parse(Int64, dtstr[19:25])
     # TODO only Millisecond three digit maybe later use TimeDates Nanosecond.
-    s = parse(Int64, dtstr[19:21]) 
+    s = parse_Int_or_Empty(dtstr[19:21]) 
     this_dt = Dates.DateTime(y, m, d, H, M, S, s)
     # @show "  $ephs"
     # @show "$this_dt"
