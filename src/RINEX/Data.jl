@@ -1,5 +1,5 @@
 
-function parse_Int_or_Empty(a::String)
+function parse_Int_or_Empty(a::AbstractString)
     b = strip(a)
     if isempty(b)
         return 0
