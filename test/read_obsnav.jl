@@ -60,3 +60,26 @@ function test_pos()
     # nh.data.data[HTgnss.SatID("G11")].eph
 
 end
+function test_2017251()
+    #= 
+    using Glob
+    using HTgnss 
+    using Dates =#
+    p = "/home/t/RD/GNSS/STEC/-1_00_01/2017/251/"
+    fs = glob("brdm*.17p", p)
+    mnh, mnd = HTgnss.load_navs(fs)
+    dt = DateTime("2017-09-06T23:59:42")
+    sats = sort!(collect(keys(mnd)), by=x -> x.str)
+    for (i, k) in enumerate(sats)
+        if string(k) == "S36"
+            @show i, k #  (111, S36)
+        end
+    end
+    isat = sats[111]
+    ees = mnd[isat]
+    # merge(dict1,dict2)   data::Dict{SatID,EphEpochStore}
+    x = HTgnss.calculate_pos(ees, dt)
+
+
+    
+end
