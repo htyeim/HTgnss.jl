@@ -96,6 +96,7 @@ function calculate_pos(ees::EphEpochStore, dt::DateTime, )
     else
         return calculate_Orbit_pos(ees, dt)
     end
+    return ECEF{Float64}(NaN, NaN, NaN)
 end
 # function calculate_pos(nav::RinexNav, sat::SatID, jd::Float64)
 
