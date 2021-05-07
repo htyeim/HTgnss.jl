@@ -98,154 +98,154 @@ function parse_rchsProg(input::String)::String
 end
 #####################################
 # nav header parse start
-begin
+# begin
 
-    function setFileSystem(c::Char, v::Float64)
-        if c == "M" && v < 3.0
-            throw(error("rinex 2 'Mixed' Nav files do not existed"))
-        end
-        char2SatelliteSystemType(c)
+function setFileSystem(c::Char, v::Float64)
+    if c == "M" && v < 3.0
+        throw(error("rinex 2 'Mixed' Nav files do not existed"))
     end
+    char2SatelliteSystemType(c)
+end
 
-    function parse_nhsVersion(input::String)
-        version  = parse(Float64, input[ 1:20])
-        fileType = input[21:40]
-        ftc  = uppercase(fileType[1])
-        fileSys  = input[41:60]
+function parse_nhsVersion(input::String)
+    version  = parse(Float64, input[ 1:20])
+    fileType = input[21:40]
+    ftc  = uppercase(fileType[1])
+    fileSys  = input[41:60]
         
-        if version > 2.99
-            if ftc != 'N'
-                throw(error("File type is not Nav $fileType"))
-            end
-            ssc = uppercase(fileSys[1])
-        else
-            if ftc == 'N'     ssc = 'G'
-            elseif ftc == 'G' ssc = 'R'
+    if version > 2.99
+        if ftc != 'N'
+            throw(error("File type is not Nav $fileType"))
+        end
+        ssc = uppercase(fileSys[1])
+    else
+        if ftc == 'N'     ssc = 'G'
+        elseif ftc == 'G' ssc = 'R'
             elseif ftc == 'H' ssc = 'S'
             else
                 throw(error("version 2 file type is invalid $fileType"))
-            end
         end
-        ss = setFileSystem(ssc, version)
+    end
+    ss = setFileSystem(ssc, version)
 
         # fileType = strip(input[21:40])
         # fileSys  = strip(input[41:60])
-        return version, fileType, fileSys, ss
-    end
+    return version, fileType, fileSys, ss
+end
     # Nav
-    function parse_nhsRunBy(input::String)
-        return strip(input[1:20]), strip(input[21:40]), strip(input[41:60])
-    end
-    parse_nhsComment(input::String)     = returninput(input)
-    parse_nhsIonoCorr(input::String)    = returninput(input)
-    function parse_nhsTimeSysCorr(input::String)
-        len = length(input) ÷ 60
-        arr = Dict{TimeCorrectionType,TimeSystemCorrection}()
-        for i in 1:len
-            start_index = (i - 1) * 61 + 1
-            line = SubString(input, start_index, start_index + 59)
-            t = string(line[1:4])
-            tp = str2TimeCorrectionType(t)
-            A0 = parse(Float64, line[6:22])
-            A1 = parse(Float64, line[23:38])
-            refSOW = parse(Int64, line[39:45])
-            refWeek = parse(Int64, line[46:51])
-            geoProvider = string(line[52:57])
-            geoUTCid = string(line[58:60])
-            arr[tp]  = getTimeSystemCorrection(tp, A0, A1,
+function parse_nhsRunBy(input::String)
+    return strip(input[1:20]), strip(input[21:40]), strip(input[41:60])
+end
+parse_nhsComment(input::String)     = returninput(input)
+parse_nhsIonoCorr(input::String)    = returninput(input)
+function parse_nhsTimeSysCorr(input::String)
+    len = length(input) ÷ 60
+    arr = Dict{TimeCorrectionType,TimeSystemCorrection}()
+    for i in 1:len
+        start_index = (i - 1) * 61 + 1
+        line = SubString(input, start_index, start_index + 59)
+        t = string(line[1:4])
+        tp = str2TimeCorrectionType(t)
+        A0 = parse(Float64, line[6:22])
+        A1 = parse(Float64, line[23:38])
+        refSOW = parse(Int64, line[39:45])
+        refWeek = parse(Int64, line[46:51])
+        geoProvider = string(line[52:57])
+        geoUTCid = string(line[58:60])
+        arr[tp]  = getTimeSystemCorrection(tp, A0, A1,
                                         refSOW, refWeek,
                                         geoProvider, geoUTCid)
-        end
-        arr
     end
+    arr
+end
 
-    function parse_lpn(s::SubString)
-        a = strip(s)
-        if a == ""
-            return 0
-        else
-            return parse(Int64, a)
-        end
+function parse_lpn(s::SubString)
+    a = strip(s)
+    if a == ""
+        return 0
+    else
+        return parse(Int64, a)
     end
-    function parse_nhsLeapSeconds(line::String)
-        if line == "" return 0, 0, 0, 0 end        
-        leapSeconds = parse(Int64, SubString(line, 1, 6))
-        leapDelta = parse_lpn(SubString(line, 7, 12))
-        leapWeek  = parse_lpn(SubString(line, 13, 18))
-        leapDay   = parse_lpn(SubString(line, 19, 20))
-        leapSeconds, leapDelta, leapWeek, leapDay
-    end
+end
+function parse_nhsLeapSeconds(line::String)
+    if line == "" return 0, 0, 0, 0 end        
+    leapSeconds = parse(Int64, SubString(line, 1, 6))
+    leapDelta = parse_lpn(SubString(line, 7, 12))
+    leapWeek  = parse_lpn(SubString(line, 13, 18))
+    leapDay   = parse_lpn(SubString(line, 19, 20))
+    leapSeconds, leapDelta, leapWeek, leapDay
+end
     # R2.10GLO
-    function parse_nhsCorrSysTime(line::String)
-        arr = Dict{TimeCorrectionType,TimeSystemCorrection}()
+function parse_nhsCorrSysTime(line::String)
+    arr = Dict{TimeCorrectionType,TimeSystemCorrection}()
         # line =  "  2011    09    08    1.578591763973e-07                    CORR TO SYSTEM TIME"
-        tp = str2TimeCorrectionType("GLUT")
-        A0 = parse(Float64, line[22:40])
-        A1 = 0.0
-        refYr  = parse(Int64, line[1:6])
-        refMon = parse(Int64, line[7:12])
-        refDay = parse(Int64, line[13:18])
-        gldt = DateTime(refYr, refMon, refDay, 0, 0, 0)
+    tp = str2TimeCorrectionType("GLUT")
+    A0 = parse(Float64, replace(line[22:40], 'D' => 'E'))
+    A1 = 0.0
+    refYr  = parse(Int64, line[1:6])
+    refMon = parse(Int64, line[7:12])
+    refDay = parse(Int64, line[13:18])
+    gldt = DateTime(refYr, refMon, refDay, 0, 0, 0)
 
-        utdt = gldt + diff2UTC(gldt, tstGLO)
+    utdt = gldt + diff2UTC(gldt, tstGLO)
         
-        refWeek, refSOW = HTgnss.datetime2gpsws(utdt)
+    refWeek, refSOW = HTgnss.datetime2gpsws(utdt)
         # @show gldt, utdt, refWeek, refSOW                                
-        geoProvider = "    "
-        geoUTCid = " 3"
-        frTST, toTST = tct2TimeSystemTypes(tp)
-        arr[tp] = TimeSystemCorrection(tp, frTST, toTST,
+    geoProvider = "    "
+    geoUTCid = " 3"
+    frTST, toTST = tct2TimeSystemTypes(tp)
+    arr[tp] = TimeSystemCorrection(tp, frTST, toTST,
                         A0, A1, refWeek, refSOW,
                         refYr, refMon, refDay,
                         geoProvider, geoUTCid)
-        arr
-    end
-    # R2.11GPS
-    function parse_nhsDeltaUTC(line::String)
-        arr = Dict{TimeCorrectionType,TimeSystemCorrection}()
-        # line =  "   -0.186264514923D-08-0.106581410364D-13   503808     1652 DELTA-UTC: A0,A1,T,W"
-        tp = str2TimeCorrectionType("GPUT")
-        A0 = parse(Float64, replace(line[4:22], 'D' => 'E'))
-        A1 = parse(Float64, replace(line[23:41], 'D' => 'E'))
-
-        refSOW = parse(Int64, line[42:50])
-        refWeek = parse(Int64, line[51:59])
-        
-        
-        geoProvider = "    "
-        geoUTCid = " 0"
-
-        arr[tp]  = getTimeSystemCorrection(tp, A0, A1,
-                            refSOW, refWeek,
-                            geoProvider, geoUTCid)
-        arr
-    end
-    # R2.11GEO
-    function parse_nhsDUTC(line::String)
-        arr = Dict{TimeCorrectionType,TimeSystemCorrection}()
-        # line =  
-        tp = str2TimeCorrectionType("SBUT")
-        A0 = parse(Float64, line[1:19])
-        A1 = parse(Float64, line[20:38])
-
-        refSOW = parse(Int64, line[38:45])
-        refWeek = parse(Int64, line[46:51])
-
-        geoProvider = line[52:57]
-        geoUTCid = line[58:59]
-
-        arr[tp]  = getTimeSystemCorrection(tp, A0, A1,
-                            refSOW, refWeek,
-                            geoProvider, geoUTCid)
-        arr
-    end
-    # R2.11
-    parse_nhsIonAlpha(input::String)    = returninput(input)
-    # R2.11
-    parse_nhsIonBeta(input::String)     = returninput(input)
-    parse_nhsEoH(input::String)         = returninput(input)
-
+    arr
 end
+    # R2.11GPS
+function parse_nhsDeltaUTC(line::String)
+    arr = Dict{TimeCorrectionType,TimeSystemCorrection}()
+        # line =  "   -0.186264514923D-08-0.106581410364D-13   503808     1652 DELTA-UTC: A0,A1,T,W"
+    tp = str2TimeCorrectionType("GPUT")
+    A0 = parse(Float64, replace(line[4:22], 'D' => 'E'))
+    A1 = parse(Float64, replace(line[23:41], 'D' => 'E'))
+
+    refSOW = parse(Int64, line[42:50])
+    refWeek = parse(Int64, line[51:59])
+        
+        
+    geoProvider = "    "
+    geoUTCid = " 0"
+
+    arr[tp]  = getTimeSystemCorrection(tp, A0, A1,
+                            refSOW, refWeek,
+                            geoProvider, geoUTCid)
+    arr
+end
+    # R2.11GEO
+function parse_nhsDUTC(line::String)
+    arr = Dict{TimeCorrectionType,TimeSystemCorrection}()
+        # line =  
+    tp = str2TimeCorrectionType("SBUT")
+    A0 = parse(Float64, line[1:19])
+    A1 = parse(Float64, line[20:38])
+
+    refSOW = parse(Int64, line[38:45])
+    refWeek = parse(Int64, line[46:51])
+
+    geoProvider = line[52:57]
+    geoUTCid = line[58:59]
+
+    arr[tp]  = getTimeSystemCorrection(tp, A0, A1,
+                            refSOW, refWeek,
+                            geoProvider, geoUTCid)
+    arr
+end
+    # R2.11
+parse_nhsIonAlpha(input::String)    = returninput(input)
+    # R2.11
+parse_nhsIonBeta(input::String)     = returninput(input)
+parse_nhsEoH(input::String)         = returninput(input)
+
+# end
 
 
 const nav_hs_function = Dict{String,Function}(
@@ -275,14 +275,14 @@ const nav_hstrings_set = Set(keys(nav_hs_function))
 # obs header parse begin
 begin
     function parse_ohsVersion(input::String)
-        version  = parse(Float64, input[ 1:20])
-        fileType = uppercase(input[21])
+    version  = parse(Float64, input[ 1:20])
+    fileType = uppercase(input[21])
 
-        fileSys  = char2SatelliteSystemType(input[41])
+    fileSys  = char2SatelliteSystemType(input[41])
         # fileType = strip(input[21:40])
         # fileSys  = strip(input[41:60])
-        return version, fileType, fileSys
-    end
+    return version, fileType, fileSys
+end
 
     parse_ohsRunBy(input::String) = parse_nhsRunBy(input)
     parse_ohsComment(input::String) = parse_nhsComment(input)
@@ -290,16 +290,16 @@ begin
     parse_ohsMarkerNumber(input::String) = returninput(input)
     parse_ohsMarkerType(input::String) = returninput(input)
     function parse_ohsObserver(input::String)
-        return strip(input[1:20]), strip(input[21:60])
-    end
+    return strip(input[1:20]), strip(input[21:60])
+end
     parse_ohsReceiver(input::String) = returninput(input)
     parse_ohsAntennaType(input::String) = returninput(input)
     function parse_ohsAntennaPosition(input::String)
-        x = parse(Float64, input[1:14])
-        y = parse(Float64, input[15:28])
-        z = parse(Float64, input[29:42])
-        ECEF{Float64}(x, y, z)
-    end
+    x = parse(Float64, input[1:14])
+    y = parse(Float64, input[15:28])
+    z = parse(Float64, input[29:42])
+    ECEF{Float64}(x, y, z)
+end
     parse_ohsAntennaDeltaHEN(input::String) = returninput(input)
     parse_ohsAntennaDeltaXYZ(input::String) = returninput(input)
     parse_ohsAntennaPhaseCtr(input::String) = returninput(input)
@@ -311,22 +311,22 @@ begin
     function NumObs2SystemNumObs(obs_codes::Array{String,1},
             obsn::Int64, sys::SatelliteSystemType,
             obst::D_SystemNumObs)
-        this_obst = Array{ObsID,1}(undef, obsn)
-        for iot in 1:obsn
+    this_obst = Array{ObsID,1}(undef, obsn)
+    for iot in 1:obsn
             # @show obs_codes[iot]
-            this_obst[iot] = ObsID(obs_codes[iot], sys)
-        end
-        obst[sys] = obsn, this_obst
-        return
+        this_obst[iot] = ObsID(obs_codes[iot], sys)
     end
+    obst[sys] = obsn, this_obst
+    return
+end
     function parse_ohsSystemNumObs2(input::String, sys::SatelliteSystemType=sstMixed)
         
         
-        obsn = parse(Int64, input[1:6])
-        maxObsPerLine = 9
-        len_max = obsn ÷ maxObsPerLine
-        res     = obsn % maxObsPerLine
-        len_max += res == 0 ? 0 : 1
+    obsn = parse(Int64, input[1:6])
+    maxObsPerLine = 9
+    len_max = obsn ÷ maxObsPerLine
+    res     = obsn % maxObsPerLine
+    len_max += res == 0 ? 0 : 1
         lines = split(input, "\n")
         length(lines) == len_max ||
                 throw(error("line number error for $obsn!\n|$lines|"))
