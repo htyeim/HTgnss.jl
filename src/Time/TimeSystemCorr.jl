@@ -8,6 +8,7 @@
     tctSBUT  # /< SBAS to UTC using A0, A1, incl. provider and UTC ID
     tctGLUT  # /< GLO  to UTC using A0 = -TauC , A1 = 0
     tctGPGA  # /< GPS  to GAL using A0 = A0G   , A1 = A1G
+    tctGAGP  # /< GPS  to GAL using A0 = A0G   , A1 = A1G
     tctGLGP  # /< GLO  to GPS using A0 = -TauGPS, A1 = 0
     tctQZGP  # /< QZS  to GPS using A0, A1
     tctQZUT  # /< QZS  to UTC using A0, A1
